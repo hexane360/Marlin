@@ -634,7 +634,7 @@
 // To use a probe you must enable one of the two options above!
 
 // Enable Z Probe Repeatability test to see how accurate your probe is
-//#define Z_MIN_PROBE_REPEATABILITY_TEST
+#define Z_MIN_PROBE_REPEATABILITY_TEST
 
 /**
  * Z probes require clearance when deploying, stowing, and moving between
@@ -650,8 +650,8 @@
  * Example: `M851 Z-5` with a CLEARANCE of 4  =>  9mm from bed to nozzle.
  *     But: `M851 Z+1` with a CLEARANCE of 2  =>  2mm from bed to nozzle.
  */
-#define Z_CLEARANCE_DEPLOY_PROBE   0 // Z Clearance for Deploy/Stow
-#define Z_CLEARANCE_BETWEEN_PROBES  3 // Z Clearance between probe points
+#define Z_CLEARANCE_DEPLOY_PROBE   5 // Z Clearance for Deploy/Stow
+#define Z_CLEARANCE_BETWEEN_PROBES  5 // Z Clearance between probe points
 
 //
 // For M851 give a range for adjusting the Z probe offset
@@ -703,7 +703,7 @@
 // Sets direction of endstops when homing; 1=MAX, -1=MIN
 // :[-1, 1]
 #define X_HOME_DIR -1
-#define Y_HOME_DIR 1
+#define Y_HOME_DIR -1
 #define Z_HOME_DIR 1
 
 #define min_software_endstops true // If true, axis won't move to coordinates less than HOME_POS.
@@ -713,10 +713,10 @@
 
 // Travel limits after homing (units are in mm)
 #define X_MIN_POS 0
-#define Y_MIN_POS -10
+#define Y_MIN_POS 0
 #define Z_MIN_POS -2
-#define X_MAX_POS 175
-#define Y_MAX_POS 191
+#define X_MAX_POS 160
+#define Y_MAX_POS 190
 #define Z_MAX_POS 159
 
 //===========================================================================
@@ -804,9 +804,9 @@
 
   // Set the boundaries for probing (where the probe can reach).
   #define LEFT_PROBE_BED_POSITION 0
-  #define RIGHT_PROBE_BED_POSITION 164
-  #define FRONT_PROBE_BED_POSITION -6
-  #define BACK_PROBE_BED_POSITION 162
+  #define RIGHT_PROBE_BED_POSITION 160
+  #define FRONT_PROBE_BED_POSITION 0
+  #define BACK_PROBE_BED_POSITION 160
 
   // The Z probe minimum outer margin (to validate G29 parameters).
   #define MIN_PROBE_EDGE 10
