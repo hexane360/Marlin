@@ -1002,17 +1002,17 @@
 
 #if ENABLED(NOZZLE_CLEAN_FEATURE)
   // Default number of pattern repetitions
-  #define NOZZLE_CLEAN_STROKES  2
+  #define NOZZLE_CLEAN_STROKES  4
   
   // Default number of triangles
   #define NOZZLE_CLEAN_TRIANGLES  12
 
   // Specify positions as { X, Y, Z }
-  #define NOZZLE_CLEAN_START_POINT { 45, 172, 0}
-  #define NOZZLE_CLEAN_END_POINT   {115, 174, 0}
+  #define NOZZLE_CLEAN_START_POINT { 40, 171, 0}
+  #define NOZZLE_CLEAN_END_POINT   {115, 173, 0}
 
   // Moves the nozzle to the initial position
-  #define NOZZLE_CLEAN_GOBACK
+  //#define NOZZLE_CLEAN_GOBACK
 #endif
 
 //
