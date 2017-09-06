@@ -216,6 +216,7 @@
 #define E1_AUTO_FAN_PIN -1
 #define E2_AUTO_FAN_PIN -1
 #define E3_AUTO_FAN_PIN -1
+#define E4_AUTO_FAN_PIN -1
 #define EXTRUDER_AUTO_FAN_TEMPERATURE 50
 #define EXTRUDER_AUTO_FAN_SPEED   255  // == full speed
 
@@ -636,6 +637,33 @@
 
 #if ENABLED(LIN_ADVANCE)
   #define LIN_ADVANCE_K 0
+
+  /**
+   * Some Slicers produce Gcode with randomly jumping extrusion widths occasionally.
+   * For example within a 0.4mm perimeter it may produce a single segment of 0.05mm width.
+   * While this is harmless for normal printing (the fluid nature of the filament will
+   * close this very, very tiny gap), it throws off the LIN_ADVANCE pressure adaption.
+   *
+   * For this case LIN_ADVANCE_E_D_RATIO can be used to set the extrusion:distance ratio
+   * to a fixed value. Note that using a fixed ratio will lead to wrong nozzle pressures
+   * if the slicer is using variable widths or layer heights within one print!
+   *
+   * This option sets the default E:D ratio at startup. Use `M900` to override this value.
+   *
+   * Example: `M900 W0.4 H0.2 D1.75`, where:
+   *   - W is the extrusion width in mm
+   *   - H is the layer height in mm
+   *   - D is the filament diameter in mm
+   *
+   * Example: `M900 R0.0458` to set the ratio directly.
+   *
+   * Set to 0 to auto-detect the ratio based on given Gcode G1 print moves.
+   *
+   * Slic3r (including Průša Control) produces Gcode compatible with the automatic mode.
+   * Cura (as of this writing) may produce Gcode incompatible with the automatic mode.
+   */
+  #define LIN_ADVANCE_E_D_RATIO 0 // The calculated ratio (or 0) according to the formula W * H / ((D / 2) ^ 2 * PI)
+                                  // Example: 0.4 * 0.2 / ((1.75 / 2) ^ 2 * PI) = 0.033260135
 #endif
 
 // @section leveling
@@ -906,6 +934,7 @@
   //#define E1_IS_TMC2130
   //#define E2_IS_TMC2130
   //#define E3_IS_TMC2130
+  //#define E4_IS_TMC2130
 
   /**
    * Stepper driver settings
