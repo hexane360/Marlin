@@ -20,15 +20,7 @@
  *
  */
 
-/**
- * About Marlin
- *
- * This firmware is a mashup between Sprinter and grbl.
- *  - https://github.com/kliment/Sprinter
- *  - https://github.com/simen/grbl/tree
- */
-
-#include "MarlinConfig.h"
+#include "src/inc/MarlinConfig.h"
 
 #if ENABLED(ULTRA_LCD)
   #if ENABLED(LCD_I2C_TYPE_PCF8575)
