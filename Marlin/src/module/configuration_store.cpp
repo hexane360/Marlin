@@ -36,13 +36,13 @@
  *
  */
 
-#define EEPROM_VERSION "V41"
+#define EEPROM_VERSION "V45"
 
 // Change EEPROM version if these are changed:
 #define EEPROM_OFFSET 100
 
 /**
- * V41 EEPROM Layout:
+ * V44 EEPROM Layout:
  *
  *  100  Version                                    (char x4)
  *  104  EEPROM CRC16                               (uint16_t)
@@ -56,7 +56,7 @@
  *  163  M204 T    planner.travel_acceleration      (float)
  *  167  M205 S    planner.min_feedrate_mm_s        (float)
  *  171  M205 T    planner.min_travel_feedrate_mm_s (float)
- *  175  M205 B    planner.min_segment_time         (ulong)
+ *  175  M205 B    planner.min_segment_time_us      (ulong)
  *  179  M205 X    planner.max_jerk[X_AXIS]         (float)
  *  183  M205 Y    planner.max_jerk[Y_AXIS]         (float)
  *  187  M205 Z    planner.max_jerk[Z_AXIS]         (float)
@@ -64,11 +64,11 @@
  *  195  M206 XYZ  home_offset                      (float x3)
  *  207  M218 XYZ  hotend_offset                    (float x3 per additional hotend)
  *
- * Global Leveling:
+ * Global Leveling:                                 4 bytes
  *  219            z_fade_height                    (float)
  *
  * MESH_BED_LEVELING:                               43 bytes
- *  223  M420 S    from mbl.status                  (bool)
+ *  223  M420 S    planner.leveling_active          (bool)
  *  224            mbl.z_offset                     (float)
  *  228            GRID_MAX_POINTS_X                (uint8_t)
  *  229            GRID_MAX_POINTS_Y                (uint8_t)
@@ -80,40 +80,41 @@
  * ABL_PLANAR:                                      36 bytes
  *  270            planner.bed_level_matrix         (matrix_3x3 = float x9)
  *
- * AUTO_BED_LEVELING_BILINEAR:                      47 bytes
+ * AUTO_BED_LEVELING_BILINEAR:                      46 bytes
  *  306            GRID_MAX_POINTS_X                (uint8_t)
  *  307            GRID_MAX_POINTS_Y                (uint8_t)
  *  308            bilinear_grid_spacing            (int x2)
  *  312  G29 L F   bilinear_start                   (int x2)
  *  316            z_values[][]                     (float x9, up to float x256) +988
  *
- * AUTO_BED_LEVELING_UBL:                           6 bytes
- *  324  G29 A     ubl.state.active                 (bool)
- *  325  G29 Z     ubl.state.z_offset               (float)
- *  329  G29 S     ubl.state.storage_slot           (int8_t)
+ * AUTO_BED_LEVELING_UBL:                           2 bytes
+ *  324  G29 A     planner.leveling_active          (bool)
+ *  325  G29 S     ubl.storage_slot                 (int8_t)
  *
- * DELTA:                                           48 bytes
- *  348  M666 XYZ  delta_endstop_adj                (float x3)
- *  360  M665 R    delta_radius                     (float)
- *  364  M665 L    delta_diagonal_rod               (float)
- *  368  M665 S    delta_segments_per_second        (float)
- *  372  M665 B    delta_calibration_radius         (float)
- *  376  M665 X    delta_tower_angle_trim[A]        (float)
- *  380  M665 Y    delta_tower_angle_trim[B]        (float)
- *  384  M665 Z    delta_tower_angle_trim[C]        (float)
+ * DELTA:                                           44 bytes
+ *  352  M666 H    delta_height                     (float)
+ *  364  M666 XYZ  delta_endstop_adj                (float x3)
+ *  368  M665 R    delta_radius                     (float)
+ *  372  M665 L    delta_diagonal_rod               (float)
+ *  376  M665 S    delta_segments_per_second        (float)
+ *  380  M665 B    delta_calibration_radius         (float)
+ *  384  M665 X    delta_tower_angle_trim[A]        (float)
+ *  388  M665 Y    delta_tower_angle_trim[B]        (float)
+ *  392  M665 Z    delta_tower_angle_trim[C]        (float)
  *
- * Z_DUAL_ENDSTOPS:                                 48 bytes
- *  348  M666 Z    endstops.z_endstop_adj           (float)
- *  ---            dummy data                       (float x11)
+ * [XYZ]_DUAL_ENDSTOPS:                             12 bytes
+ *  352  M666 X    endstops.x_endstop_adj           (float)
+ *  356  M666 Y    endstops.y_endstop_adj           (float)
+ *  360  M666 Z    endstops.z_endstop_adj           (float)
  *
  * ULTIPANEL:                                       6 bytes
  *  396  M145 S0 H lcd_preheat_hotend_temp          (int x2)
  *  400  M145 S0 B lcd_preheat_bed_temp             (int x2)
  *  404  M145 S0 F lcd_preheat_fan_speed            (int x2)
  *
- * PIDTEMP:                                         66 bytes
+ * PIDTEMP:                                         82 bytes
  *  408  M301 E0 PIDC  Kp[0], Ki[0], Kd[0], Kc[0]   (float x4)
- *  424  M301 E1 PIDC  Kp[1], Ki[1], Kd[1], Kc[1]   (float x4)
+ *  428  M301 E1 PIDC  Kp[1], Ki[1], Kd[1], Kc[1]   (float x4)
  *  440  M301 E2 PIDC  Kp[2], Ki[2], Kd[2], Kc[2]   (float x4)
  *  456  M301 E3 PIDC  Kp[3], Ki[3], Kd[3], Kc[3]   (float x4)
  *  472  M301 E4 PIDC  Kp[3], Ki[3], Kd[3], Kc[3]   (float x4)
@@ -140,7 +141,7 @@
  *  537  M200 D    parser.volumetric_enabled        (bool)
  *  538  M200 T D  planner.filament_size            (float x5) (T0..3)
  *
- * HAVE_TMC2130:                                    20 bytes
+ * HAVE_TMC2130:                                    22 bytes
  *  558  M906 X    Stepper X current                (uint16_t)
  *  560  M906 Y    Stepper Y current                (uint16_t)
  *  562  M906 Z    Stepper Z current                (uint16_t)
@@ -151,19 +152,22 @@
  *  572  M906 E1   Stepper E1 current               (uint16_t)
  *  574  M906 E2   Stepper E2 current               (uint16_t)
  *  576  M906 E3   Stepper E3 current               (uint16_t)
- *  580  M906 E4   Stepper E4 current               (uint16_t)
+ *  578  M906 E4   Stepper E4 current               (uint16_t)
  *
  * LIN_ADVANCE:                                     8 bytes
- *  584  M900 K    extruder_advance_k               (float)
- *  588  M900 WHD  advance_ed_ratio                 (float)
+ *  580  M900 K    extruder_advance_k               (float)
+ *  584  M900 WHD  advance_ed_ratio                 (float)
  *
  * HAS_MOTOR_CURRENT_PWM:
- *  592  M907 X    Stepper XY current               (uint32_t)
- *  596  M907 Z    Stepper Z current                (uint32_t)
- *  600  M907 E    Stepper E current                (uint32_t)
+ *  588  M907 X    Stepper XY current               (uint32_t)
+ *  592  M907 Z    Stepper Z current                (uint32_t)
+ *  596  M907 E    Stepper E current                (uint32_t)
  *
- *  604                                Minimum end-point
- * 1925 (604 + 36 + 9 + 288 + 988)     Maximum end-point
+ * CNC_COORDINATE_SYSTEMS                           108 bytes
+ *  600  G54-G59.3 coordinate_system                (float x 27)
+ *
+ *  708                                Minimum end-point
+ * 2025 (704 + 36 + 9 + 288 + 988)     Maximum end-point
  *
  * ========================================================================
  * meshes_begin (between max and min end-point, directly above)
@@ -203,6 +207,14 @@ MarlinSettings settings;
   #include "../feature/fwretract.h"
 #endif
 
+#if ENABLED(ENABLE_LEVELING_FADE_HEIGHT)
+  float new_z_fade_height;
+#endif
+
+#if ENABLED(CNC_COORDINATE_SYSTEMS)
+  bool position_changed;
+#endif
+
 /**
  * Post-process after Retrieve or Reset
  */
@@ -213,7 +225,7 @@ void MarlinSettings::postprocess() {
   // Make sure delta kinematics are updated before refreshing the
   // planner position so the stepper counts will be set correctly.
   #if ENABLED(DELTA)
-    recalc_delta_settings(delta_radius, delta_diagonal_rod, delta_tower_angle_trim);
+    recalc_delta_settings();
   #endif
 
   // Refresh steps_to_mm with the reciprocal of axis_steps_per_mm
@@ -232,11 +244,7 @@ void MarlinSettings::postprocess() {
   #endif
 
   #if ENABLED(ENABLE_LEVELING_FADE_HEIGHT)
-    set_z_fade_height(planner.z_fade_height);
-  #endif
-
-  #if HAS_BED_PROBE
-    refresh_zprobe_zoffset();
+    set_z_fade_height(new_z_fade_height);
   #endif
 
   #if ENABLED(AUTO_BED_LEVELING_BILINEAR)
@@ -250,6 +258,13 @@ void MarlinSettings::postprocess() {
 
   #if ENABLED(FWRETRACT)
     fwretract.refresh_autoretract();
+  #endif
+
+  #if ENABLED(CNC_COORDINATE_SYSTEMS)
+    if (position_changed) {
+      report_current_position();
+      position_changed = false;
+    }
   #endif
 }
 
@@ -288,7 +303,7 @@ void MarlinSettings::postprocess() {
     EEPROM_WRITE(ver);     // invalidate data first
     EEPROM_SKIP(working_crc); // Skip the checksum slot
 
-    working_crc = 0; // clear before first "real data"
+    working_crc = 0;  // Init to 0. Accumulated by EEPROM_READ
 
     const uint8_t esteppers = COUNT(planner.axis_steps_per_mm) - XYZ;
     EEPROM_WRITE(esteppers);
@@ -302,20 +317,12 @@ void MarlinSettings::postprocess() {
     EEPROM_WRITE(planner.travel_acceleration);
     EEPROM_WRITE(planner.min_feedrate_mm_s);
     EEPROM_WRITE(planner.min_travel_feedrate_mm_s);
-    EEPROM_WRITE(planner.min_segment_time);
+    EEPROM_WRITE(planner.min_segment_time_us);
     EEPROM_WRITE(planner.max_jerk);
     #if !HAS_HOME_OFFSET
       const float home_offset[XYZ] = { 0 };
     #endif
-    #if ENABLED(DELTA)
-      dummy = 0.0;
-      EEPROM_WRITE(dummy);
-      EEPROM_WRITE(dummy);
-      dummy = DELTA_HEIGHT + home_offset[Z_AXIS];
-      EEPROM_WRITE(dummy);
-    #else
-      EEPROM_WRITE(home_offset);
-    #endif
+    EEPROM_WRITE(home_offset);
 
     #if HOTENDS > 1
       // Skip hotend 0 which must be 0
@@ -330,7 +337,7 @@ void MarlinSettings::postprocess() {
     #if ENABLED(ENABLE_LEVELING_FADE_HEIGHT)
       const float zfh = planner.z_fade_height;
     #else
-      const float zfh = 10.0;
+      const float zfh = 0.0;
     #endif
     EEPROM_WRITE(zfh);
 
@@ -344,9 +351,8 @@ void MarlinSettings::postprocess() {
         sizeof(mbl.z_values) == GRID_MAX_POINTS * sizeof(mbl.z_values[0][0]),
         "MBL Z array is the wrong size."
       );
-      const bool leveling_is_on = TEST(mbl.status, MBL_STATUS_HAS_MESH_BIT);
       const uint8_t mesh_num_x = GRID_MAX_POINTS_X, mesh_num_y = GRID_MAX_POINTS_Y;
-      EEPROM_WRITE(leveling_is_on);
+      EEPROM_WRITE(mbl.has_mesh);
       EEPROM_WRITE(mbl.z_offset);
       EEPROM_WRITE(mesh_num_x);
       EEPROM_WRITE(mesh_num_y);
@@ -407,35 +413,51 @@ void MarlinSettings::postprocess() {
     #endif // AUTO_BED_LEVELING_BILINEAR
 
     #if ENABLED(AUTO_BED_LEVELING_UBL)
-      EEPROM_WRITE(ubl.state.active);
-      EEPROM_WRITE(ubl.state.z_offset);
-      EEPROM_WRITE(ubl.state.storage_slot);
+      EEPROM_WRITE(planner.leveling_active);
+      EEPROM_WRITE(ubl.storage_slot);
     #else
       const bool ubl_active = false;
-      dummy = 0.0f;
       const int8_t storage_slot = -1;
       EEPROM_WRITE(ubl_active);
-      EEPROM_WRITE(dummy);
       EEPROM_WRITE(storage_slot);
     #endif // AUTO_BED_LEVELING_UBL
 
-    // 10 floats for DELTA / Z_DUAL_ENDSTOPS
+    // 10 floats for DELTA / [XYZ]_DUAL_ENDSTOPS
     #if ENABLED(DELTA)
+      EEPROM_WRITE(delta_height);              // 1 float
       EEPROM_WRITE(delta_endstop_adj);         // 3 floats
       EEPROM_WRITE(delta_radius);              // 1 float
       EEPROM_WRITE(delta_diagonal_rod);        // 1 float
       EEPROM_WRITE(delta_segments_per_second); // 1 float
       EEPROM_WRITE(delta_calibration_radius);  // 1 float
       EEPROM_WRITE(delta_tower_angle_trim);    // 3 floats
+
+    #elif ENABLED(X_DUAL_ENDSTOPS) || ENABLED(Y_DUAL_ENDSTOPS) || ENABLED(Z_DUAL_ENDSTOPS)
+      // Write dual endstops in X, Y, Z order. Unused = 0.0
       dummy = 0.0f;
-      for (uint8_t q = 2; q--;) EEPROM_WRITE(dummy);
-    #elif ENABLED(Z_DUAL_ENDSTOPS)
-      EEPROM_WRITE(endstops.z_endstop_adj);    // 1 float
-      dummy = 0.0f;
-      for (uint8_t q = 11; q--;) EEPROM_WRITE(dummy);
+      #if ENABLED(X_DUAL_ENDSTOPS)
+        EEPROM_WRITE(endstops.x_endstop_adj);   // 1 float
+      #else
+        EEPROM_WRITE(dummy);
+      #endif
+
+      #if ENABLED(Y_DUAL_ENDSTOPS)
+        EEPROM_WRITE(endstops.y_endstop_adj);   // 1 float
+      #else
+        EEPROM_WRITE(dummy);
+      #endif
+
+      #if ENABLED(Z_DUAL_ENDSTOPS)
+        EEPROM_WRITE(endstops.z_endstop_adj);   // 1 float
+      #else
+        EEPROM_WRITE(dummy);
+      #endif
+
+      for (uint8_t q = 7; q--;) EEPROM_WRITE(dummy);
+
     #else
       dummy = 0.0f;
-      for (uint8_t q = 12; q--;) EEPROM_WRITE(dummy);
+      for (uint8_t q = 10; q--;) EEPROM_WRITE(dummy);
     #endif
 
     #if DISABLED(ULTIPANEL)
@@ -611,6 +633,13 @@ void MarlinSettings::postprocess() {
       for (uint8_t q = 3; q--;) EEPROM_WRITE(dummyui32);
     #endif
 
+    #if ENABLED(CNC_COORDINATE_SYSTEMS)
+      EEPROM_WRITE(coordinate_system); // 27 floats
+    #else
+      dummy = 0.0f;
+      for (uint8_t q = 27; q--;) EEPROM_WRITE(dummy);
+    #endif
+
     if (!eeprom_error) {
       #if ENABLED(EEPROM_CHITCHAT)
         const int eeprom_size = eeprom_index;
@@ -632,12 +661,13 @@ void MarlinSettings::postprocess() {
         SERIAL_ECHOLNPGM(")");
       #endif
     }
+    EEPROM_FINISH();
 
     #if ENABLED(UBL_SAVE_ACTIVE_ON_M500)
-      if (ubl.state.storage_slot >= 0)
-        store_mesh(ubl.state.storage_slot);
+      if (ubl.storage_slot >= 0)
+        store_mesh(ubl.storage_slot);
     #endif
-    EEPROM_FINISH();
+
     return !eeprom_error;
   }
 
@@ -679,6 +709,10 @@ void MarlinSettings::postprocess() {
       uint8_t esteppers;
       EEPROM_READ(esteppers);
 
+      //
+      // Planner Motion
+      //
+
       // Get only the number of E stepper parameters previously stored
       // Any steppers added later are set to their defaults
       const float def1[] = DEFAULT_AXIS_STEPS_PER_UNIT, def2[] = DEFAULT_MAX_FEEDRATE;
@@ -699,19 +733,21 @@ void MarlinSettings::postprocess() {
       EEPROM_READ(planner.travel_acceleration);
       EEPROM_READ(planner.min_feedrate_mm_s);
       EEPROM_READ(planner.min_travel_feedrate_mm_s);
-      EEPROM_READ(planner.min_segment_time);
+      EEPROM_READ(planner.min_segment_time_us);
       EEPROM_READ(planner.max_jerk);
+
+      //
+      // Home Offset (M206)
+      //
 
       #if !HAS_HOME_OFFSET
         float home_offset[XYZ];
       #endif
       EEPROM_READ(home_offset);
 
-      #if ENABLED(DELTA)
-        home_offset[X_AXIS] = 0.0;
-        home_offset[Y_AXIS] = 0.0;
-        home_offset[Z_AXIS] -= DELTA_HEIGHT;
-      #endif
+      //
+      // Hotend Offsets, if any
+      //
 
       #if HOTENDS > 1
         // Skip hotend 0 which must be 0
@@ -724,7 +760,7 @@ void MarlinSettings::postprocess() {
       //
 
       #if ENABLED(ENABLE_LEVELING_FADE_HEIGHT)
-        EEPROM_READ(planner.z_fade_height);
+        EEPROM_READ(new_z_fade_height);
       #else
         EEPROM_READ(dummy);
       #endif
@@ -741,7 +777,7 @@ void MarlinSettings::postprocess() {
       EEPROM_READ(mesh_num_y);
 
       #if ENABLED(MESH_BED_LEVELING)
-        mbl.status = leveling_is_on ? _BV(MBL_STATUS_HAS_MESH_BIT) : 0;
+        mbl.has_mesh = leveling_is_on;
         mbl.z_offset = dummy;
         if (mesh_num_x == GRID_MAX_POINTS_X && mesh_num_y == GRID_MAX_POINTS_Y) {
           // EEPROM data fits the current mesh
@@ -796,47 +832,78 @@ void MarlinSettings::postprocess() {
           for (uint16_t q = grid_max_x * grid_max_y; q--;) EEPROM_READ(dummy);
         }
 
+      //
+      // Unified Bed Leveling active state
+      //
+
       #if ENABLED(AUTO_BED_LEVELING_UBL)
-        EEPROM_READ(ubl.state.active);
-        EEPROM_READ(ubl.state.z_offset);
-        EEPROM_READ(ubl.state.storage_slot);
+        EEPROM_READ(planner.leveling_active);
+        EEPROM_READ(ubl.storage_slot);
       #else
         uint8_t dummyui8;
         EEPROM_READ(dummyb);
-        EEPROM_READ(dummy);
         EEPROM_READ(dummyui8);
       #endif // AUTO_BED_LEVELING_UBL
 
+      //
+      // DELTA Geometry or Dual Endstops offsets
+      //
+
       #if ENABLED(DELTA)
+        EEPROM_READ(delta_height);              // 1 float
         EEPROM_READ(delta_endstop_adj);         // 3 floats
         EEPROM_READ(delta_radius);              // 1 float
         EEPROM_READ(delta_diagonal_rod);        // 1 float
         EEPROM_READ(delta_segments_per_second); // 1 float
         EEPROM_READ(delta_calibration_radius);  // 1 float
         EEPROM_READ(delta_tower_angle_trim);    // 3 floats
-        dummy = 0.0f;
-        for (uint8_t q=2; q--;) EEPROM_READ(dummy);
-      #elif ENABLED(Z_DUAL_ENDSTOPS)
-        EEPROM_READ(endstops.z_endstop_adj);    // 1 float
-        dummy = 0.0f;
-        for (uint8_t q=11; q--;) EEPROM_READ(dummy);
+
+      #elif ENABLED(X_DUAL_ENDSTOPS) || ENABLED(Y_DUAL_ENDSTOPS) || ENABLED(Z_DUAL_ENDSTOPS)
+
+        #if ENABLED(X_DUAL_ENDSTOPS)
+          EEPROM_READ(endstops.x_endstop_adj);  // 1 float
+        #else
+          EEPROM_READ(dummy);
+        #endif
+        #if ENABLED(Y_DUAL_ENDSTOPS)
+          EEPROM_READ(endstops.y_endstop_adj);  // 1 float
+        #else
+          EEPROM_READ(dummy);
+        #endif
+        #if ENABLED(Z_DUAL_ENDSTOPS)
+          EEPROM_READ(endstops.z_endstop_adj); // 1 float
+        #else
+          EEPROM_READ(dummy);
+        #endif
+
+        for (uint8_t q=7; q--;) EEPROM_READ(dummy);
+
       #else
-        dummy = 0.0f;
-        for (uint8_t q=12; q--;) EEPROM_READ(dummy);
+
+        for (uint8_t q=10; q--;) EEPROM_READ(dummy);
+
       #endif
+
+      //
+      // LCD Preheat settings
+      //
 
       #if DISABLED(ULTIPANEL)
         int lcd_preheat_hotend_temp[2], lcd_preheat_bed_temp[2], lcd_preheat_fan_speed[2];
       #endif
 
-      EEPROM_READ(lcd_preheat_hotend_temp);
-      EEPROM_READ(lcd_preheat_bed_temp);
-      EEPROM_READ(lcd_preheat_fan_speed);
+      EEPROM_READ(lcd_preheat_hotend_temp); // 2 floats
+      EEPROM_READ(lcd_preheat_bed_temp);    // 2 floats
+      EEPROM_READ(lcd_preheat_fan_speed);   // 2 floats
 
       //EEPROM_ASSERT(
       //  WITHIN(lcd_preheat_fan_speed, 0, 255),
       //  "lcd_preheat_fan_speed out of range"
       //);
+
+      //
+      // Hotend PID
+      //
 
       #if ENABLED(PIDTEMP)
         for (uint8_t e = 0; e < MAX_EXTRUDERS; e++) {
@@ -861,10 +928,18 @@ void MarlinSettings::postprocess() {
         for (uint8_t q = MAX_EXTRUDERS * 4; q--;) EEPROM_READ(dummy);  // Kp, Ki, Kd, Kc
       #endif // !PIDTEMP
 
+      //
+      // PID Extrusion Scaling
+      //
+
       #if DISABLED(PID_EXTRUSION_SCALING)
         int lpq_len;
       #endif
       EEPROM_READ(lpq_len);
+
+      //
+      // Heated Bed PID
+      //
 
       #if ENABLED(PIDTEMPBED)
         EEPROM_READ(dummy); // bedKp
@@ -877,10 +952,18 @@ void MarlinSettings::postprocess() {
         for (uint8_t q=3; q--;) EEPROM_READ(dummy); // bedKp, bedKi, bedKd
       #endif
 
+      //
+      // LCD Contrast
+      //
+
       #if !HAS_LCD_CONTRAST
         uint16_t lcd_contrast;
       #endif
       EEPROM_READ(lcd_contrast);
+
+      //
+      // Firmware Retraction
+      //
 
       #if ENABLED(FWRETRACT)
         EEPROM_READ(fwretract.autoretract_enabled);
@@ -897,12 +980,19 @@ void MarlinSettings::postprocess() {
         for (uint8_t q=8; q--;) EEPROM_READ(dummy);
       #endif
 
-      EEPROM_READ(parser.volumetric_enabled);
+      //
+      // Volumetric & Filament Size
+      //
 
+      EEPROM_READ(parser.volumetric_enabled);
       for (uint8_t q = 0; q < MAX_EXTRUDERS; q++) {
         EEPROM_READ(dummy);
         if (q < COUNT(planner.filament_size)) planner.filament_size[q] = dummy;
       }
+
+      //
+      // TMC2130 Stepper Current
+      //
 
       uint16_t val;
       #if ENABLED(HAVE_TMC2130)
@@ -951,7 +1041,7 @@ void MarlinSettings::postprocess() {
           stepperE4.setCurrent(val, R_SENSE, HOLD_MULTIPLIER);
         #endif
       #else
-        for (uint8_t q = 0; q < 11; q++) EEPROM_READ(val);
+        for (uint8_t q = 11; q--;) EEPROM_READ(val);
       #endif
 
       //
@@ -966,11 +1056,26 @@ void MarlinSettings::postprocess() {
         EEPROM_READ(dummy);
       #endif
 
+      //
+      // Motor Current PWM
+      //
+
       #if HAS_MOTOR_CURRENT_PWM
         for (uint8_t q = 3; q--;) EEPROM_READ(stepper.motor_current_setting[q]);
       #else
         uint32_t dummyui32;
         for (uint8_t q = 3; q--;) EEPROM_READ(dummyui32);
+      #endif
+
+      //
+      // CNC Coordinate System
+      //
+
+      #if ENABLED(CNC_COORDINATE_SYSTEMS)
+        position_changed = gcode.select_coordinate_system(-1); // Go back to machine space
+        EEPROM_READ(gcode.coordinate_system);                  // 27 floats
+      #else
+        for (uint8_t q = 27; q--;) EEPROM_READ(dummy);
       #endif
 
       if (working_crc == stored_crc) {
@@ -1017,10 +1122,10 @@ void MarlinSettings::postprocess() {
           ubl.reset();
         }
 
-        if (ubl.state.storage_slot >= 0) {
-          load_mesh(ubl.state.storage_slot);
+        if (ubl.storage_slot >= 0) {
+          load_mesh(ubl.storage_slot);
           #if ENABLED(EEPROM_CHITCHAT)
-            SERIAL_ECHOPAIR("Mesh ", ubl.state.storage_slot);
+            SERIAL_ECHOPAIR("Mesh ", ubl.storage_slot);
             SERIAL_ECHOLNPGM(" loaded from storage.");
           #endif
         }
@@ -1075,14 +1180,21 @@ void MarlinSettings::postprocess() {
         }
 
         uint16_t crc = 0;
+        bool status;
         int pos = meshes_end - (slot + 1) * sizeof(ubl.z_values);
 
-        HAL::PersistentStore::write_data(pos, (uint8_t *)&ubl.z_values, sizeof(ubl.z_values), &crc);
+        HAL::PersistentStore::access_start();
+        status = HAL::PersistentStore::write_data(pos, (uint8_t *)&ubl.z_values, sizeof(ubl.z_values), &crc);
+        HAL::PersistentStore::access_finish();
+
+        if (status)
+          SERIAL_PROTOCOL("?Unable to save mesh data.\n");
 
         // Write crc to MAT along with other data, or just tack on to the beginning or end
 
         #if ENABLED(EEPROM_CHITCHAT)
-          SERIAL_PROTOCOLLNPAIR("Mesh saved in slot ", slot);
+          if (!status)
+            SERIAL_PROTOCOLLNPAIR("Mesh saved in slot ", slot);
         #endif
 
       #else
@@ -1108,13 +1220,20 @@ void MarlinSettings::postprocess() {
         uint16_t crc = 0;
         int pos = meshes_end - (slot + 1) * sizeof(ubl.z_values);
         uint8_t * const dest = into ? (uint8_t*)into : (uint8_t*)&ubl.z_values;
-        HAL::PersistentStore::read_data(pos, dest, sizeof(ubl.z_values), &crc);
+        uint16_t status;
 
-        // Compare crc with crc from MAT, or read from end
+        HAL::PersistentStore::access_start();
+        status = HAL::PersistentStore::read_data(pos, dest, sizeof(ubl.z_values), &crc);
+        HAL::PersistentStore::access_finish();
+
+        if (status)
+          SERIAL_PROTOCOL("?Unable to load mesh data.\n");
 
         #if ENABLED(EEPROM_CHITCHAT)
-          SERIAL_PROTOCOLLNPAIR("Mesh loaded from slot ", slot);
+          else
+            SERIAL_PROTOCOLLNPAIR("Mesh loaded from slot ", slot);
         #endif
+        EEPROM_FINISH();
 
       #else
 
@@ -1154,7 +1273,7 @@ void MarlinSettings::reset() {
   planner.retract_acceleration = DEFAULT_RETRACT_ACCELERATION;
   planner.travel_acceleration = DEFAULT_TRAVEL_ACCELERATION;
   planner.min_feedrate_mm_s = DEFAULT_MINIMUMFEEDRATE;
-  planner.min_segment_time = DEFAULT_MINSEGMENTTIME;
+  planner.min_segment_time_us = DEFAULT_MINSEGMENTTIME;
   planner.min_travel_feedrate_mm_s = DEFAULT_MINTRAVELFEEDRATE;
   planner.max_jerk[X_AXIS] = DEFAULT_XJERK;
   planner.max_jerk[Y_AXIS] = DEFAULT_YJERK;
@@ -1162,7 +1281,7 @@ void MarlinSettings::reset() {
   planner.max_jerk[E_AXIS] = DEFAULT_EJERK;
 
   #if ENABLED(ENABLE_LEVELING_FADE_HEIGHT)
-    planner.z_fade_height = 0.0;
+    new_z_fade_height = 0.0;
   #endif
 
   #if HAS_HOME_OFFSET
@@ -1198,23 +1317,43 @@ void MarlinSettings::reset() {
   #if ENABLED(DELTA)
     const float adj[ABC] = DELTA_ENDSTOP_ADJ,
                 dta[ABC] = DELTA_TOWER_ANGLE_TRIM;
+    delta_height = DELTA_HEIGHT;
     COPY(delta_endstop_adj, adj);
     delta_radius = DELTA_RADIUS;
     delta_diagonal_rod = DELTA_DIAGONAL_ROD;
     delta_segments_per_second = DELTA_SEGMENTS_PER_SECOND;
     delta_calibration_radius = DELTA_CALIBRATION_RADIUS;
     COPY(delta_tower_angle_trim, dta);
-    home_offset[Z_AXIS] = 0;
 
-  #elif ENABLED(Z_DUAL_ENDSTOPS)
+  #elif ENABLED(X_DUAL_ENDSTOPS) || ENABLED(Y_DUAL_ENDSTOPS) || ENABLED(Z_DUAL_ENDSTOPS)
 
-    endstops.z_endstop_adj =
-      #ifdef Z_DUAL_ENDSTOPS_ADJUSTMENT
-        Z_DUAL_ENDSTOPS_ADJUSTMENT
-      #else
-        0
-      #endif
-    ;
+    #if ENABLED(X_DUAL_ENDSTOPS)
+      endstops.x_endstop_adj = (
+        #ifdef X_DUAL_ENDSTOPS_ADJUSTMENT
+          X_DUAL_ENDSTOPS_ADJUSTMENT
+        #else
+          0
+        #endif
+      );
+    #endif
+    #if ENABLED(Y_DUAL_ENDSTOPS)
+      endstops.y_endstop_adj = (
+        #ifdef Y_DUAL_ENDSTOPS_ADJUSTMENT
+          Y_DUAL_ENDSTOPS_ADJUSTMENT
+        #else
+          0
+        #endif
+      );
+    #endif
+    #if ENABLED(Z_DUAL_ENDSTOPS)
+      endstops.z_endstop_adj = (
+        #ifdef Z_DUAL_ENDSTOPS_ADJUSTMENT
+          Z_DUAL_ENDSTOPS_ADJUSTMENT
+        #else
+          0
+        #endif
+      );
+    #endif
 
   #endif
 
@@ -1492,12 +1631,12 @@ void MarlinSettings::reset() {
 
     if (!forReplay) {
       CONFIG_ECHO_START;
-      SERIAL_ECHOLNPGM("Advanced: S<min_feedrate> T<min_travel_feedrate> B<min_segment_time_ms> X<max_xy_jerk> Z<max_z_jerk> E<max_e_jerk>");
+      SERIAL_ECHOLNPGM("Advanced: S<min_feedrate> T<min_travel_feedrate> B<min_segment_time_us> X<max_xy_jerk> Z<max_z_jerk> E<max_e_jerk>");
     }
     CONFIG_ECHO_START;
     SERIAL_ECHOPAIR("  M205 S", LINEAR_UNIT(planner.min_feedrate_mm_s));
     SERIAL_ECHOPAIR(" T", LINEAR_UNIT(planner.min_travel_feedrate_mm_s));
-    SERIAL_ECHOPAIR(" B", planner.min_segment_time);
+    SERIAL_ECHOPAIR(" B", planner.min_segment_time_us);
     SERIAL_ECHOPAIR(" X", LINEAR_UNIT(planner.max_jerk[X_AXIS]));
     SERIAL_ECHOPAIR(" Y", LINEAR_UNIT(planner.max_jerk[Y_AXIS]));
     SERIAL_ECHOPAIR(" Z", LINEAR_UNIT(planner.max_jerk[Z_AXIS]));
@@ -1562,9 +1701,9 @@ void MarlinSettings::reset() {
         SERIAL_ECHOLNPGM(":");
       }
       CONFIG_ECHO_START;
-      SERIAL_ECHOPAIR("  M420 S", leveling_is_active() ? 1 : 0);
+      SERIAL_ECHOPAIR("  M420 S", planner.leveling_active ? 1 : 0);
       #if ENABLED(ENABLE_LEVELING_FADE_HEIGHT)
-        SERIAL_ECHOPAIR(" Z", planner.z_fade_height);
+        SERIAL_ECHOPAIR(" Z", LINEAR_UNIT(planner.z_fade_height));
       #endif
       SERIAL_EOL();
 
@@ -1572,12 +1711,7 @@ void MarlinSettings::reset() {
         SERIAL_EOL();
         ubl.report_state();
 
-        SERIAL_ECHOLNPAIR("\nActive Mesh Slot: ", ubl.state.storage_slot);
-
-        SERIAL_ECHOPGM("z_offset: ");
-        SERIAL_ECHO_F(ubl.state.z_offset, 6);
-        SERIAL_EOL();
-
+        SERIAL_ECHOLNPAIR("\nActive Mesh Slot: ", ubl.storage_slot);
         SERIAL_ECHOPAIR("EEPROM can hold ", calc_num_meshes());
         SERIAL_ECHOLNPGM(" meshes.\n");
       }
@@ -1589,7 +1723,7 @@ void MarlinSettings::reset() {
         SERIAL_ECHOLNPGM("Auto Bed Leveling:");
       }
       CONFIG_ECHO_START;
-      SERIAL_ECHOPAIR("  M420 S", leveling_is_active() ? 1 : 0);
+      SERIAL_ECHOPAIR("  M420 S", planner.leveling_active ? 1 : 0);
       #if ENABLED(ENABLE_LEVELING_FADE_HEIGHT)
         SERIAL_ECHOPAIR(" Z", LINEAR_UNIT(planner.z_fade_height));
       #endif
@@ -1613,20 +1747,31 @@ void MarlinSettings::reset() {
       CONFIG_ECHO_START;
       SERIAL_ECHOPAIR("  M665 L", LINEAR_UNIT(delta_diagonal_rod));
       SERIAL_ECHOPAIR(" R", LINEAR_UNIT(delta_radius));
-      SERIAL_ECHOPAIR(" H", LINEAR_UNIT(DELTA_HEIGHT + home_offset[Z_AXIS]));
+      SERIAL_ECHOPAIR(" H", LINEAR_UNIT(delta_height));
       SERIAL_ECHOPAIR(" S", delta_segments_per_second);
       SERIAL_ECHOPAIR(" B", LINEAR_UNIT(delta_calibration_radius));
       SERIAL_ECHOPAIR(" X", LINEAR_UNIT(delta_tower_angle_trim[A_AXIS]));
       SERIAL_ECHOPAIR(" Y", LINEAR_UNIT(delta_tower_angle_trim[B_AXIS]));
       SERIAL_ECHOPAIR(" Z", LINEAR_UNIT(delta_tower_angle_trim[C_AXIS]));
       SERIAL_EOL();
-    #elif ENABLED(Z_DUAL_ENDSTOPS)
+
+    #elif ENABLED(X_DUAL_ENDSTOPS) || ENABLED(Y_DUAL_ENDSTOPS) || ENABLED(Z_DUAL_ENDSTOPS)
       if (!forReplay) {
         CONFIG_ECHO_START;
-        SERIAL_ECHOLNPGM("Z2 Endstop adjustment:");
+        SERIAL_ECHOLNPGM("Endstop adjustment:");
       }
       CONFIG_ECHO_START;
-      SERIAL_ECHOLNPAIR("  M666 Z", LINEAR_UNIT(endstops.z_endstop_adj));
+      SERIAL_ECHOPGM("  M666");
+      #if ENABLED(X_DUAL_ENDSTOPS)
+        SERIAL_ECHOPAIR(" X", LINEAR_UNIT(endstops.x_endstop_adj));
+      #endif
+      #if ENABLED(Y_DUAL_ENDSTOPS)
+        SERIAL_ECHOPAIR(" Y", LINEAR_UNIT(endstops.y_endstop_adj));
+      #endif
+      #if ENABLED(Z_DUAL_ENDSTOPS)
+        SERIAL_ECHOPAIR(" Z", LINEAR_UNIT(endstops.z_endstop_adj));
+      #endif
+      SERIAL_EOL();
     #endif // DELTA
 
     #if ENABLED(ULTIPANEL)
@@ -1634,8 +1779,8 @@ void MarlinSettings::reset() {
         CONFIG_ECHO_START;
         SERIAL_ECHOLNPGM("Material heatup parameters:");
       }
-      CONFIG_ECHO_START;
       for (uint8_t i = 0; i < COUNT(lcd_preheat_hotend_temp); i++) {
+        CONFIG_ECHO_START;
         SERIAL_ECHOPAIR("  M145 S", (int)i);
         SERIAL_ECHOPAIR(" H", TEMP_UNIT(lcd_preheat_hotend_temp[i]));
         SERIAL_ECHOPAIR(" B", TEMP_UNIT(lcd_preheat_bed_temp[i]));
@@ -1731,7 +1876,7 @@ void MarlinSettings::reset() {
     #endif // FWRETRACT
 
     /**
-     * Auto Bed Leveling
+     * Probe Offset
      */
     #if HAS_BED_PROBE
       if (!forReplay) {

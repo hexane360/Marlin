@@ -44,8 +44,8 @@
  *         7 | 11
  */
 
-#if ENABLED(IS_REARM)
-  #error "Oops!  use 'pins_RAMPS_RE_ARM.h' when Re-Arm is used."
+#if ENABLED(TARGET_LPC1768)
+  #error "Oops!  Use 'BOARD_RAMPS_RE_ARM' to build for Re-ARM."
 #endif
 
 #if !ENABLED(IS_RAMPS_SMART) && !ENABLED(IS_RAMPS_DUO) && !ENABLED(IS_RAMPS4DUE) && !ENABLED(TARGET_LPC1768)
@@ -57,8 +57,6 @@
 #ifndef BOARD_NAME
   #define BOARD_NAME "RAMPS 1.4"
 #endif
-
-#define LARGE_FLASH true
 
 //
 // Servos
@@ -195,7 +193,7 @@
 #endif
 
 #ifndef FAN_PIN
-  #define FAN_PIN 4      // IO pin. Buffer needed
+  #define FAN_PIN           4   // IO pin. Buffer needed
 #endif
 
 //
@@ -489,3 +487,17 @@
   #endif // NEWPANEL
 
 #endif // ULTRA_LCD
+
+#if ENABLED(ANET_KEYPAD_LCD)
+  #define LCD_PINS_RS        64
+  #define LCD_PINS_ENABLE    44
+  #define LCD_PINS_D4        63
+  #define LCD_PINS_D5        40
+  #define LCD_PINS_D6        42
+  #define LCD_PINS_D7        65
+  #define ADC_KEYPAD_PIN     12
+  #define BTN_EN1            -1
+  #define BTN_EN2            -1
+  #define BTN_ENC            -1
+  // pin 29 N/C
+#endif // ANET_KEYPAD_LCD

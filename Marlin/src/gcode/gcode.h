@@ -113,8 +113,8 @@
  * M100 - Watch Free Memory (for debugging) (Requires M100_FREE_MEMORY_WATCHER)
  * M104 - Set extruder target temp.
  * M105 - Report current temperatures.
- * M106 - Fan on.
- * M107 - Fan off.
+ * M106 - Set print fan speed.
+ * M107 - Print fan off.
  * M108 - Break out of heating loops (M109, M190, M303). With no controller, breaks out of M0/M1. (Requires EMERGENCY_PARSER)
  * M109 - Sxxx Wait for extruder current temp to reach target temp. Waits only when heating
  *        Rxxx Wait for extruder current temp to reach target temp. Waits when heating and cooling
@@ -169,6 +169,7 @@
  * M260 - i2c Send Data (Requires EXPERIMENTAL_I2CBUS)
  * M261 - i2c Request Data (Requires EXPERIMENTAL_I2CBUS)
  * M280 - Set servo position absolute: "M280 P<index> S<angle|µs>". (Requires servos)
+ * M290 - Babystepping (Requires BABYSTEPPING)
  * M300 - Play beep sound S<frequency Hz> P<duration ms>
  * M301 - Set PID parameters P I and D. (Requires PIDTEMP)
  * M302 - Allow cold extrudes, or set the minimum extrude S<temperature>. (Requires PREVENT_COLD_EXTRUSION)
@@ -265,11 +266,19 @@ public:
     static WorkspacePlane workspace_plane;
   #endif
 
+  #if ENABLED(CNC_COORDINATE_SYSTEMS)
+    #define MAX_COORDINATE_SYSTEMS 9
+    static int8_t active_coordinate_system;
+    static float coordinate_system[MAX_COORDINATE_SYSTEMS][XYZ];
+    static bool select_coordinate_system(const int8_t _new);
+  #endif
+
   static millis_t previous_cmd_ms;
   FORCE_INLINE static void refresh_cmd_timeout() { previous_cmd_ms = millis(); }
 
   static bool get_target_extruder_from_command();
   static void get_destination_from_command();
+  static void process_parsed_command();
   static void process_next_command();
 
   static FORCE_INLINE void home_all_axes() { G28(true); }
@@ -370,7 +379,7 @@ private:
     #endif
   #endif
 
-  #if PROBE_SELECTED && ENABLED(DELTA_AUTO_CALIBRATION)
+  #if ENABLED(DELTA_AUTO_CALIBRATION)
     static void G33();
   #endif
 
@@ -380,6 +389,17 @@ private:
 
   #if HAS_MESH
     static void G42();
+  #endif
+
+  #if ENABLED(CNC_COORDINATE_SYSTEMS)
+    bool select_coordinate_system(const int8_t _new);
+    static void G53();
+    static void G54();
+    static void G55();
+    static void G56();
+    static void G57();
+    static void G58();
+    static void G59();
   #endif
 
   static void G92();
@@ -435,6 +455,10 @@ private:
 
   #if ENABLED(UBL_G26_MESH_VALIDATION)
     static void M49();
+  #endif
+
+  #if ENABLED(ULTRA_LCD) && ENABLED(LCD_SET_PROGRESS_MANUALLY)
+    static void M73();
   #endif
 
   static void M75();
@@ -579,6 +603,10 @@ private:
 
   #if HAS_SERVOS
     static void M280();
+  #endif
+
+  #if ENABLED(BABYSTEPPING)
+    static void M290();
   #endif
 
   #if HAS_BUZZER

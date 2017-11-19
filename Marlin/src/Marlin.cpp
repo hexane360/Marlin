@@ -138,6 +138,10 @@
   #include "feature/caselight.h"
 #endif
 
+#if HAS_FANMUX
+  #include "feature/fanmux.h"
+#endif
+
 #if (ENABLED(SWITCHING_EXTRUDER) && !DONT_SWITCH) || ENABLED(SWITCHING_NOZZLE) || ENABLED(PARKING_EXTRUDER)
   #include "module/tool_change.h"
 #endif
@@ -165,6 +169,10 @@ bool axis_homed[XYZ] = { false }, axis_known_position[XYZ] = { false };
 
 #if FAN_COUNT > 0
   int16_t fanSpeeds[FAN_COUNT] = { 0 };
+  #if ENABLED(EXTRA_FAN_SPEED)
+    int16_t old_fanSpeeds[FAN_COUNT],
+            new_fanSpeeds[FAN_COUNT];
+  #endif
   #if ENABLED(PROBING_FANS_OFF)
     bool fans_paused = false;
     int16_t paused_fanSpeeds[FAN_COUNT] = { 0 };
@@ -293,10 +301,13 @@ void setup_powerhold() {
 /**
  * Sensitive pin test for M42, M226
  */
-bool pin_is_protected(const int8_t pin) {
-  static const int8_t sensitive_pins[] PROGMEM = SENSITIVE_PINS;
-  for (uint8_t i = 0; i < COUNT(sensitive_pins); i++)
-    if (pin == (int8_t)pgm_read_byte(&sensitive_pins[i])) return true;
+bool pin_is_protected(const pin_t pin) {
+  static const pin_t sensitive_pins[] PROGMEM = SENSITIVE_PINS;
+  for (uint8_t i = 0; i < COUNT(sensitive_pins); i++) {
+    pin_t sensitive_pin;
+    memcpy_P(&sensitive_pin, &sensitive_pins[i], sizeof(pin_t));
+    if (pin == sensitive_pin) return true;
+  }
   return false;
 }
 
@@ -498,7 +509,7 @@ void manage_inactivity(bool ignore_stepper_queue/*=false*/) {
     if (delayed_move_time && ELAPSED(ms, delayed_move_time + 1000UL) && IsRunning()) {
       // travel moves have been received so enact them
       delayed_move_time = 0xFFFFFFFFUL; // force moves to be done
-      set_destination_to_current();
+      set_destination_from_current();
       prepare_move_to_destination();
     }
   #endif
@@ -511,7 +522,12 @@ void manage_inactivity(bool ignore_stepper_queue/*=false*/) {
     tmc2130_checkOverTemp();
   #endif
 
-  planner.check_axes_activity();
+  // Limit check_axes_activity frequency to 10Hz
+  static millis_t next_check_axes_ms = 0;
+  if (ELAPSED(ms, next_check_axes_ms)) {
+    planner.check_axes_activity();
+    next_check_axes_ms = ms + 100UL;
+  }
 }
 
 /**
@@ -650,7 +666,7 @@ void setup() {
     Max7219_init();
   #endif
 
-  #ifdef DISABLE_JTAG
+  #if ENABLED(DISABLE_JTAG)
     // Disable JTAG on AT90USB chips to free up pins for IO
     MCUCR = 0x80;
     MCUCR = 0x80;
@@ -785,7 +801,6 @@ void setup() {
   #endif
 
   #if ENABLED(NEOPIXEL_LED)
-    SET_OUTPUT(NEOPIXEL_PIN);
     setup_neopixel();
   #endif
 
@@ -810,22 +825,10 @@ void setup() {
 
   lcd_init();
 
-  #ifndef CUSTOM_BOOTSCREEN_TIMEOUT
-    #define CUSTOM_BOOTSCREEN_TIMEOUT 2500
-  #endif
-
   #if ENABLED(SHOW_BOOTSCREEN)
-    #if ENABLED(DOGLCD)                           // On DOGM the first bootscreen is already drawn
-      #if ENABLED(SHOW_CUSTOM_BOOTSCREEN)
-        safe_delay(CUSTOM_BOOTSCREEN_TIMEOUT);    // Custom boot screen pause
-        lcd_bootscreen();                         // Show Marlin boot screen
-      #endif
-      safe_delay(BOOTSCREEN_TIMEOUT);             // Pause
-    #elif ENABLED(ULTRA_LCD)
-      lcd_bootscreen();
-      #if DISABLED(SDSUPPORT)
+    lcd_bootscreen();
+    #if ENABLED(ULTRA_LCD) && DISABLED(SDSUPPORT)
         lcd_init();
-      #endif
     #endif
   #endif
 
