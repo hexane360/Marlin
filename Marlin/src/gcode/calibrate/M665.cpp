@@ -30,7 +30,6 @@
 #if ENABLED(DELTA)
 
   #include "../../module/delta.h"
-
   /**
    * M665: Set delta configurations
    *
@@ -41,13 +40,10 @@
    *    B = delta calibration radius
    *    X = Alpha (Tower 1) angle trim
    *    Y = Beta (Tower 2) angle trim
-   *    Z = Rotate A and B by this angle
+   *    Z = Gamma (Tower 3) angle trim
    */
   void GcodeSuite::M665() {
-    if (parser.seen('H')) {
-      delta_height = parser.value_linear_units();
-      update_software_endstops(Z_AXIS);
-    }
+    if (parser.seen('H')) delta_height                   = parser.value_linear_units();
     if (parser.seen('L')) delta_diagonal_rod             = parser.value_linear_units();
     if (parser.seen('R')) delta_radius                   = parser.value_linear_units();
     if (parser.seen('S')) delta_segments_per_second      = parser.value_float();
