@@ -1722,6 +1722,33 @@ static_assert(COUNT(sanity_arr_1) <= XYZE_N, "DEFAULT_AXIS_STEPS_PER_UNIT has to
 static_assert(COUNT(sanity_arr_2) <= XYZE_N, "DEFAULT_MAX_FEEDRATE has too many elements.");
 static_assert(COUNT(sanity_arr_3) <= XYZE_N, "DEFAULT_MAX_ACCELERATION has too many elements.");
 
+
+/**
+ * Require 3 elements in point initializers
+ */
+constexpr float sanity_bump_divs[] = HOMING_BUMP_DIVISOR;
+static_assert(COUNT(sanity_bump_divs) == XYZ, "HOMING_BUMP_DIVISOR requires 3 elements");
+#if ENABLED(NOZZLE_PARK_FEATURE)
+  constexpr float sanity_park_pt[] = NOZZLE_PARK_POINT;
+  static_assert(COUNT(sanity_park_pt) == XYZ, "NOZZLE_PARK_POINT requires 3 elements");
+#endif
+#if ENABLED(NOZZLE_CLEAN_FEATURE)
+  constexpr float sanity_clean_start_pt[] = NOZZLE_CLEAN_START_POINT,
+                  sanity_clean_end_pt[] = NOZZLE_CLEAN_END_POINT;
+  static_assert(COUNT(sanity_clean_start_pt) == XYZ, "NOZZLE_CLEAN_START_POINT requires 3 elements");
+  static_assert(COUNT(sanity_clean_end_pt) == XYZ, "NOZZLE_CLEAN_END_POINT requires 3 elements");
+#endif
+#if defined(HOMING_BACKOFF)
+  constexpr float sanity_backoff_pt[] = HOMING_BACKOFF;
+  static_assert(COUNT(sanity_backoff_pt) == XYZ, "HOMING_BACKOFF requires 3 elements");
+  static_assert(sanity_backoff_pt[0] >= 0 && sanity_backoff_pt[1] >= 0 && sanity_backoff_pt[2] >= 0,
+    "HOMING_BACKOFF must be greater than or equal to 0.");
+  #if IS_KINEMATIC
+    #error "HOMING_BACKOFF requires a Cartesian setup."
+  #endif
+#endif
+
+
 #if ENABLED(CNC_COORDINATE_SYSTEMS) && ENABLED(NO_WORKSPACE_OFFSETS)
   #error "CNC_COORDINATE_SYSTEMS is incompatible with NO_WORKSPACE_OFFSETS."
 #endif
