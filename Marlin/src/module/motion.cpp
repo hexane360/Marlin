@@ -68,6 +68,10 @@ XYZ_CONSTS(float, max_length,     MAX_LENGTH);
 XYZ_CONSTS(float, home_bump_mm,   HOME_BUMP_MM);
 XYZ_CONSTS(signed char, home_dir, HOME_DIR);
 
+#if defined(HOMING_BACKOFF)
+  const PROGMEM float homing_backoff[XYZ] = HOMING_BACKOFF;
+#endif
+
 // Relative Mode. Enable with G91, disable with G90.
 bool relative_mode; // = false;
 
@@ -1438,6 +1442,17 @@ void homeaxis(const AxisEnum axis) {
   // Clear retracted status if homing the Z axis
   #if ENABLED(FWRETRACT)
     if (axis == Z_AXIS) fwretract.hop_amount = 0.0;
+  #endif
+  
+  // Back away from endstop
+  #if defined(HOMING_BACKOFF)
+    const float backoff = pgm_read_any(&homing_backoff[axis]);
+    if (backoff > 0) {
+      #if ENABLED(DEBUG_LEVELING_FEATURE)
+        if (DEBUGGING(LEVELING)) SERIAL_ECHOLNPGM("Backing off:");
+      #endif
+      do_homing_move(axis, backoff * -axis_home_dir);
+    }
   #endif
 
   #if ENABLED(DEBUG_LEVELING_FEATURE)
