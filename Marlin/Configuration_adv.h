@@ -444,7 +444,7 @@
 //
 // Use Junction Deviation instead of traditional Jerk Limiting
 //
-//#define JUNCTION_DEVIATION
+#define JUNCTION_DEVIATION
 #if ENABLED(JUNCTION_DEVIATION)
   #define JUNCTION_DEVIATION_MM 0.02  // (mm) Distance from real junction edge
 #endif
@@ -735,7 +735,7 @@
  *
  * Warning: Does not respect endstops!
  */
-//#define BABYSTEPPING
+#define BABYSTEPPING
 #if ENABLED(BABYSTEPPING)
   //#define BABYSTEP_XY              // Also enable X/Y Babystepping. Not supported on DELTA!
   #define BABYSTEP_INVERT_Z false    // Change if Z babysteps should go the other way
@@ -794,15 +794,15 @@
    * between attempts, and after the maximum number of retries have been tried.
    */
   #define G29_SUCCESS_COMMANDS "M117 Bed leveling done."
-  #define G29_RECOVER_COMMANDS "M117 Probe failed. Rewiping.\nG28\nG1 Z10 F900\nG12 P1 S2\nG1 Z10 F900"
+  #define G29_RECOVER_COMMANDS "M117 Probe failed. Rewiping.\nG1 F2000\nG12 P1 S2\nG1 Z10 F900"
   #define G29_FAILURE_COMMANDS "M117 Bed leveling failed.\nG0 Z10\nM104 S0\nM140 S0"
   /**
    * Specify an action command to send to the host on a recovery attempt or failure.
    * Will be sent in the form '//action:ACTION_ON_G29_FAILURE', e.g. '//action:probe_failed'.
    * The host must be configured to handle the action command.
    */
-  #define G29_ACTION_ON_RECOVER "probe_rewipe"
-  #define G29_ACTION_ON_FAILURE "probe_failed"
+  //#define G29_ACTION_ON_RECOVER "probe_rewipe"
+  //#define G29_ACTION_ON_FAILURE "probe_failed"
 #endif
 
 // @section extras
