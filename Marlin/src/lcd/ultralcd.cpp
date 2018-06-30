@@ -829,11 +829,15 @@ void lcd_quick_feedback(const bool clear_buttons) {
 #if ENABLED(ULTIPANEL)
 
   void lcd_completion_feedback(const bool good/*=true*/) {
-    if (good) {
-      lcd_buzz(100, 659);
-      lcd_buzz(100, 698);
-    }
-    else lcd_buzz(20, 440);
+    #if LCD_FEEDBACK_FREQUENCY_HZ > 0
+      if (good) {
+        lcd_buzz(100, 659);
+        lcd_buzz(100, 698);
+      }
+      else lcd_buzz(20, 440);
+    #else
+      UNUSED(good);
+    #endif
   }
 
   inline void line_to_current_z() {
