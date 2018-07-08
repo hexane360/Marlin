@@ -1333,6 +1333,9 @@
 
   // Moves the nozzle to the initial position
   //#define NOZZLE_CLEAN_GOBACK
+
+  // Distance to raise after cleaning
+  #define NOZZLE_CLEAN_RAISE  5
 #endif
 
 /**

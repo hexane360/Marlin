@@ -41,22 +41,11 @@
    * @param strokes number of strokes to execute
    */
   void Nozzle::stroke(const point_t &start, const point_t &end, const uint8_t &strokes) {
-    #if ENABLED(NOZZLE_CLEAN_GOBACK)
-      const float ix = current_position[X_AXIS], iy = current_position[Y_AXIS], iz = current_position[Z_AXIS];
-    #endif
-
-    // Move to the starting point
-    do_blocking_move_to(start.x, start.y, start.z);
-
     // Start the stroke pattern
     for (uint8_t i = 0; i < (strokes >> 1); i++) {
       do_blocking_move_to_xy(end.x, end.y);
       do_blocking_move_to_xy(start.x, start.y);
     }
-
-    #if ENABLED(NOZZLE_CLEAN_GOBACK)
-      do_blocking_move_to(ix, iy, iz);
-    #endif
   }
 
   /**
@@ -71,12 +60,6 @@
   void Nozzle::zigzag(const point_t &start, const point_t &end, const uint8_t &strokes, const uint8_t &objects) {
     const float diffx = end.x - start.x, diffy = end.y - start.y;
     if (!diffx || !diffy) return;
-
-    #if ENABLED(NOZZLE_CLEAN_GOBACK)
-      const float ix = current_position[X_AXIS], iy = current_position[Y_AXIS], iz = current_position[Z_AXIS];
-    #endif
-
-    do_blocking_move_to(start.x, start.y, start.z);
 
     const uint8_t zigs = objects << 1;
     const bool horiz = ABS(diffx) >= ABS(diffy);    // Do a horizontal wipe?
@@ -98,10 +81,6 @@
           do_blocking_move_to_xy(side->x, start.y + i * P);
       }
     }
-
-    #if ENABLED(NOZZLE_CLEAN_GOBACK)
-      do_blocking_move_to(ix, iy, iz);
-    #endif
   }
 
   /**
@@ -115,12 +94,6 @@
   void Nozzle::circle(const point_t &start, const point_t &middle, const uint8_t &strokes, const float &radius) {
     if (strokes == 0) return;
 
-    #if ENABLED(NOZZLE_CLEAN_GOBACK)
-      const float ix = current_position[X_AXIS], iy = current_position[Y_AXIS], iz = current_position[Z_AXIS];
-    #endif
-
-    do_blocking_move_to(start.x, start.y, start.z);
-
     for (uint8_t s = 0; s < strokes; s++)
       for (uint8_t i = 0; i < NOZZLE_CLEAN_CIRCLE_FN; i++)
         do_blocking_move_to_xy(
@@ -130,10 +103,6 @@
 
     // Let's be safe
     do_blocking_move_to_xy(start.x, start.y);
-
-    #if ENABLED(NOZZLE_CLEAN_GOBACK)
-      do_blocking_move_to(ix, iy, iz);
-    #endif
   }
 
   /**
@@ -143,19 +112,33 @@
    * @param pattern one of the available patterns
    * @param argument depends on the cleaning pattern
    */
-  void Nozzle::clean(const uint8_t &pattern, const uint8_t &strokes, const float &radius, const uint8_t &objects/*=0*/) {
+  void Nozzle::clean(const uint8_t &pattern, const uint8_t &strokes, const float &radius, const uint8_t &objects/*=0*/) { 
+    #if ENABLED(NOZZLE_CLEAN_GOBACK)
+      const float ix = current_position[X_AXIS], iy = current_position[Y_AXIS], iz = current_position[Z_AXIS];
+    #endif
+    // Move to the starting point
+    point_t start = NOZZLE_CLEAN_START_POINT;
+    do_blocking_move_to(start.x, start.y, start.z);
+    
     switch (pattern) {
       case 1:
-        zigzag(NOZZLE_CLEAN_START_POINT, NOZZLE_CLEAN_END_POINT, strokes, objects);
+        zigzag(start, NOZZLE_CLEAN_END_POINT, strokes, objects);
         break;
 
       case 2:
-        circle(NOZZLE_CLEAN_START_POINT, NOZZLE_CLEAN_CIRCLE_MIDDLE, strokes, radius);
+        circle(start, NOZZLE_CLEAN_CIRCLE_MIDDLE, strokes, radius);
         break;
 
       default:
-        stroke(NOZZLE_CLEAN_START_POINT, NOZZLE_CLEAN_END_POINT, strokes);
+        stroke(start, NOZZLE_CLEAN_END_POINT, strokes);
     }
+    
+    #if NOZZLE_CLEAN_RAISE > 0
+      do_blocking_move_to_z(current_position[Z_AXIS] + NOZZLE_CLEAN_RAISE);
+    #endif
+    #if ENABLED(NOZZLE_CLEAN_GOBACK)
+      do_blocking_move_to(ix, iy, iz);
+    #endif
   }
 
 #endif // NOZZLE_CLEAN_FEATURE
