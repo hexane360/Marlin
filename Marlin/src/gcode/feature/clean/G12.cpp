@@ -29,6 +29,9 @@
 #include "../../gcode.h"
 #include "../../parser.h"
 #include "../../../module/motion.h"
+#if HAS_AUTOLEVEL
+  #include "../../../module/planner.h"
+#endif
 
 /**
  * G12: Clean the nozzle
@@ -36,7 +39,11 @@
 void GcodeSuite::G12() {
   // Don't allow nozzle cleaning without homing first
   if (axis_unhomed_error()) return;
-
+  
+  #if HAS_AUTOLEVEL
+    if (parser.boolval('O') && planner.leveling_active) return; 
+  #endif
+  
   const uint8_t pattern = parser.ushortval('P', 0),
                 strokes = parser.ushortval('S', NOZZLE_CLEAN_STROKES),
                 objects = parser.ushortval('T', NOZZLE_CLEAN_TRIANGLES);
