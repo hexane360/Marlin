@@ -387,7 +387,7 @@
  * Distance to back off from endstops post-homing
  *                                      X, Y, Z
  */
-//#define HOMING_BACKOFF                { 0, 0, 5 }
+#define HOMING_BACKOFF                { 0, 0, 5 }
 
 // When G28 is called, this option will make Y home before X
 //#define HOME_Y_BEFORE_X
