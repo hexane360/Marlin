@@ -411,7 +411,7 @@
 // Default stepper release if idle. Set to 0 to deactivate.
 // Steppers will shut down DEFAULT_STEPPER_DEACTIVE_TIME seconds after the last move when DISABLE_INACTIVE_? is true.
 // Time can be set by M18 and M84.
-#define DEFAULT_STEPPER_DEACTIVE_TIME 180
+#define DEFAULT_STEPPER_DEACTIVE_TIME 240
 #define DISABLE_INACTIVE_X true
 #define DISABLE_INACTIVE_Y true
 #define DISABLE_INACTIVE_Z true  // set to false if the nozzle will fall down on your printed part when print has finished.
@@ -801,7 +801,7 @@
    */
   #define G29_SUCCESS_COMMANDS "M117 Bed leveling done."
   #define G29_RECOVER_COMMANDS "M117 Probe failed. Rewiping.\nG12 P1\nM117 Leveling. . ."
-  //#define G29_FAILURE_COMMANDS "M117 Bed leveling failed.\nG0 Z10\nM104 S0\nM140 S0"
+  #define G29_FAILURE_COMMANDS "M104 S0\nM140 S0\nG91\nG1 Z40 E5 F200\nM400"
   /**
    * Specify an action command to send to the host on a recovery attempt or failure.
    * Will be sent in the form '//action:ACTION_ON_G29_FAILURE', e.g. '//action:probe_failed'.
@@ -1563,7 +1563,7 @@
   #define USER_SCRIPT_RETURN  // Return to status screen after a script
 
   #define USER_DESC_1 "Calibrate"
-  #define USER_GCODE_1 "M204 T2000\nM104 S170\nM117 Homing XY. . .\nG28 XY\nM109 S170\nM117 Homing Z. . .\nM83\nG1 E-5 F100\nG28 Z\nM117 Wiping. . .\nG12 P1\nM117 Leveling. . .\nG29 V4\nG1 E5 F100\nM82\nM104 S0\nM117 Calibrated."
+  #define USER_GCODE_1 "M204 T2000\nM104 S170\nM117 Homing XY. . .\nG28 XY\nM109 S170\nM117 Homing Z. . .\nM83\nG1 E-5 F100\nG28 Z\nM117 Wiping. . .\nG12 P1\nM117 Leveling. . .\nG29 V4\nM104 S0\nM117 Calibrated.\nG1 X5 Y15 Z40 E5 F6000\nM82"
 
   //#define USER_DESC_2 "Preheat for PLA"
   //#define USER_GCODE_2 "M140 S" STRINGIFY(PREHEAT_1_TEMP_BED) "\nM104 S" STRINGIFY(PREHEAT_1_TEMP_HOTEND)

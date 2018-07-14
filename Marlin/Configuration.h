@@ -1321,8 +1321,8 @@
   #define NOZZLE_CLEAN_TRIANGLES  6
 
   // Specify positions as { X, Y, Z }
-  #define NOZZLE_CLEAN_START_POINT { -10.5,  79, 1.5} //values vary for single extruder
-  #define NOZZLE_CLEAN_END_POINT   {  -6.5, 108, 1.5}
+  #define NOZZLE_CLEAN_START_POINT { -10.5,  79, 1.0} //values vary for single extruder
+  #define NOZZLE_CLEAN_END_POINT   {  -6.5, 108, 1.0}
 
   // Circular pattern radius
   #define NOZZLE_CLEAN_CIRCLE_RADIUS 6.5
