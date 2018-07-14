@@ -637,9 +637,15 @@ static float run_z_probe() {
         SERIAL_ECHOLNPAIR(" Discrepancy:", first_probe_z - z2);
       }
     #endif
-
-    // Return a weighted average of the fast and slow probes
-    const float measured_z = (z2 * 3.0 + first_probe_z * 2.0) * 0.2;
+    
+    #if ENABLED(FIX_MOUNTED_PROBE)
+      // Return slow probe only
+      const float measured_z = z2;
+      UNUSED(first_probe_z);
+    #else
+      // Return a weighted average of the fast and slow probes
+      const float measured_z = (z2 * 3.0 + first_probe_z * 2.0) * 0.2;
+    #endif
 
   #else
 
