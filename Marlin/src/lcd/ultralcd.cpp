@@ -1036,7 +1036,7 @@ void lcd_quick_feedback(const bool clear_buttons) {
 
   #endif // HAS_DEBUG_MENU
 
-  #if ENABLED(CUSTOM_USER_MENUS)
+  #if ENABLED(CUSTOM_USER_MENUS) && USER_SCRIPT_COUNT > 0
 
     #ifdef USER_SCRIPT_DONE
       #define _DONE_SCRIPT "\n" USER_SCRIPT_DONE
@@ -1054,43 +1054,46 @@ void lcd_quick_feedback(const bool clear_buttons) {
       #endif
     }
 
-    #if defined(USER_DESC_1) && defined(USER_GCODE_1)
-      void lcd_user_gcode_1() { _lcd_user_gcode(PSTR(USER_GCODE_1 _DONE_SCRIPT)); }
-    #endif
-    #if defined(USER_DESC_2) && defined(USER_GCODE_2)
-      void lcd_user_gcode_2() { _lcd_user_gcode(PSTR(USER_GCODE_2 _DONE_SCRIPT)); }
-    #endif
-    #if defined(USER_DESC_3) && defined(USER_GCODE_3)
-      void lcd_user_gcode_3() { _lcd_user_gcode(PSTR(USER_GCODE_3 _DONE_SCRIPT)); }
-    #endif
-    #if defined(USER_DESC_4) && defined(USER_GCODE_4)
-      void lcd_user_gcode_4() { _lcd_user_gcode(PSTR(USER_GCODE_4 _DONE_SCRIPT)); }
-    #endif
-    #if defined(USER_DESC_5) && defined(USER_GCODE_5)
-      void lcd_user_gcode_5() { _lcd_user_gcode(PSTR(USER_GCODE_5 _DONE_SCRIPT)); }
-    #endif
-
-    void _lcd_user_menu() {
-      START_MENU();
-      MENU_BACK(MSG_MAIN);
+    #if USER_SCRIPT_COUNT > 1
       #if defined(USER_DESC_1) && defined(USER_GCODE_1)
-        MENU_ITEM(function, USER_DESC_1, lcd_user_gcode_1);
+        void lcd_user_gcode_1() { _lcd_user_gcode(PSTR(USER_GCODE_1 _DONE_SCRIPT)); }
       #endif
       #if defined(USER_DESC_2) && defined(USER_GCODE_2)
-        MENU_ITEM(function, USER_DESC_2, lcd_user_gcode_2);
+        void lcd_user_gcode_2() { _lcd_user_gcode(PSTR(USER_GCODE_2 _DONE_SCRIPT)); }
       #endif
       #if defined(USER_DESC_3) && defined(USER_GCODE_3)
-        MENU_ITEM(function, USER_DESC_3, lcd_user_gcode_3);
+        void lcd_user_gcode_3() { _lcd_user_gcode(PSTR(USER_GCODE_3 _DONE_SCRIPT)); }
       #endif
       #if defined(USER_DESC_4) && defined(USER_GCODE_4)
-        MENU_ITEM(function, USER_DESC_4, lcd_user_gcode_4);
+        void lcd_user_gcode_4() { _lcd_user_gcode(PSTR(USER_GCODE_4 _DONE_SCRIPT)); }
       #endif
       #if defined(USER_DESC_5) && defined(USER_GCODE_5)
-        MENU_ITEM(function, USER_DESC_5, lcd_user_gcode_5);
+        void lcd_user_gcode_5() { _lcd_user_gcode(PSTR(USER_GCODE_5 _DONE_SCRIPT)); }
       #endif
-      END_MENU();
-    }
 
+      void _lcd_user_menu() {
+        START_MENU();
+        MENU_BACK(MSG_MAIN);
+        #if defined(USER_DESC_1) && defined(USER_GCODE_1)
+          MENU_ITEM(function, USER_DESC_1, lcd_user_gcode_1);
+        #endif
+        #if defined(USER_DESC_2) && defined(USER_GCODE_2)
+          MENU_ITEM(function, USER_DESC_2, lcd_user_gcode_2);
+        #endif
+        #if defined(USER_DESC_3) && defined(USER_GCODE_3)
+          MENU_ITEM(function, USER_DESC_3, lcd_user_gcode_3);
+        #endif
+        #if defined(USER_DESC_4) && defined(USER_GCODE_4)
+          MENU_ITEM(function, USER_DESC_4, lcd_user_gcode_4);
+        #endif
+        #if defined(USER_DESC_5) && defined(USER_GCODE_5)
+          MENU_ITEM(function, USER_DESC_5, lcd_user_gcode_5);
+        #endif
+        END_MENU();
+      }
+    #elif USER_SCRIPT_COUNT == 1
+      void lcd_user_gcode() { _lcd_user_gcode(PSTR(USER_GCODE _DONE_SCRIPT)); }
+    #endif
   #endif
 
   /**
@@ -1103,8 +1106,12 @@ void lcd_quick_feedback(const bool clear_buttons) {
     START_MENU();
     MENU_BACK(MSG_WATCH);
 
-    #if ENABLED(CUSTOM_USER_MENUS)
-      MENU_ITEM(submenu, MSG_USER_MENU, _lcd_user_menu);
+    #if ENABLED(CUSTOM_USER_MENUS) && USER_SCRIPT_COUNT > 0
+      #if USER_SCRIPT_COUNT > 1
+        MENU_ITEM(submenu, MSG_USER_MENU, _lcd_user_menu);
+      #else
+        MENU_ITEM(function, USER_DESC, lcd_user_gcode);
+      #endif
     #endif
 
     //
@@ -3762,13 +3769,11 @@ void lcd_quick_feedback(const bool clear_buttons) {
     }
 
     // M205 Jerk
-    void lcd_control_motion_jerk_menu() {
-      START_MENU();
-      MENU_BACK(MSG_MOTION);
+    #if DISABLED(JUNCTION_DEVIATION)
+      void lcd_control_motion_jerk_menu() {
+        START_MENU();
+        MENU_BACK(MSG_MOTION);
 
-      #if ENABLED(JUNCTION_DEVIATION)
-        MENU_ITEM_EDIT_CALLBACK(float43, MSG_JUNCTION_DEVIATION, &planner.junction_deviation_mm, 0.01f, 0.3f, planner.recalculate_max_e_jerk);
-      #else
         MENU_MULTIPLIER_ITEM_EDIT(float3, MSG_VA_JERK, &planner.max_jerk[A_AXIS], 1, 990);
         MENU_MULTIPLIER_ITEM_EDIT(float3, MSG_VB_JERK, &planner.max_jerk[B_AXIS], 1, 990);
         #if ENABLED(DELTA)
@@ -3777,10 +3782,10 @@ void lcd_quick_feedback(const bool clear_buttons) {
           MENU_MULTIPLIER_ITEM_EDIT(float52sign, MSG_VC_JERK, &planner.max_jerk[C_AXIS], 0.1f, 990);
         #endif
         MENU_MULTIPLIER_ITEM_EDIT(float3, MSG_VE_JERK, &planner.max_jerk[E_AXIS], 1, 990);
-      #endif
 
-      END_MENU();
-    }
+        END_MENU();
+      }
+    #endif
 
     // M92 Steps-per-mm
     void lcd_control_motion_steps_per_mm_menu() {
@@ -3837,8 +3842,12 @@ void lcd_quick_feedback(const bool clear_buttons) {
       // M201 - Acceleration items
       MENU_ITEM(submenu, MSG_ACCELERATION, lcd_control_motion_acceleration_menu);
 
-      // M205 - Max Jerk
-      MENU_ITEM(submenu, MSG_JERK, lcd_control_motion_jerk_menu);
+      #if DISABLED(JUNCTION_DEVIATION)
+        // M205 - Max Jerk
+        MENU_ITEM(submenu, MSG_JERK, lcd_control_motion_jerk_menu);
+      #else
+        MENU_ITEM_EDIT_CALLBACK(float43, MSG_JUNCTION_DEVIATION, &planner.junction_deviation_mm, 0.01f, 0.3f, planner.recalculate_max_e_jerk);
+      #endif
 
       // M92 - Steps Per mm
       MENU_ITEM(submenu, MSG_STEPS_PER_MM, lcd_control_motion_steps_per_mm_menu);

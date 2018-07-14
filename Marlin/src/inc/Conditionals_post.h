@@ -1383,6 +1383,30 @@
   #endif
 #endif
 
+// User scripts
+#if ENABLED(CUSTOM_USER_MENUS)
+  #define HAS_USER_SCRIPT(n) (defined(USER_DESC_##n) && defined(USER_GCODE_##n))
+  #define USER_SCRIPT_COUNT (HAS_USER_SCRIPT(1) + HAS_USER_SCRIPT(2) + HAS_USER_SCRIPT(3) + HAS_USER_SCRIPT(4) + HAS_USER_SCRIPT(5))
+  #if USER_SCRIPT_COUNT
+    #if HAS_USER_SCRIPT(1)
+      #define USER_DESC USER_DESC_1
+      #define USER_GCODE USER_GCODE_1
+    #elif HAS_USER_SCRIPT(2)
+      #define USER_DESC USER_DESC_2
+      #define USER_GCODE USER_GCODE_2
+    #elif HAS_USER_SCRIPT(3)
+      #define USER_DESC USER_DESC_3
+      #define USER_GCODE USER_GCODE_3
+    #elif HAS_USER_SCRIPT(4)
+      #define USER_DESC USER_DESC_4
+      #define USER_GCODE USER_GCODE_4
+    #else
+      #define USER_DESC USER_DESC_5
+      #define USER_GCODE USER_GCODE_5
+    #endif
+  #endif
+#endif
+
 // Nozzle park
 #if ENABLED(NOZZLE_PARK_FEATURE) && ENABLED(DELTA)
   #undef NOZZLE_PARK_Z_FEEDRATE
