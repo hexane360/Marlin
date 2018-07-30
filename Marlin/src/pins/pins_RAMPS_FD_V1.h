@@ -127,7 +127,9 @@
 #define HEATER_2_PIN       11
 #define HEATER_BED_PIN      8
 
-#define FAN_PIN            12
+#ifndef FAN_PIN
+  #define FAN_PIN          12
+#endif
 #define CONTROLLER_FAN_PIN -1
 
 //
@@ -142,28 +144,41 @@
 #if ENABLED(ULTRA_LCD)
   // ramps-fd lcd adaptor
 
-  #define BEEPER_PIN          37
-  #define BTN_EN1             33
-  #define BTN_EN2             31
-  #define BTN_ENC             35
-  #define SD_DETECT_PIN       49
+  #define BEEPER_PIN       37
+  #define BTN_EN1          33
+  #define BTN_EN2          31
+  #define BTN_ENC          35
+  #define SD_DETECT_PIN    49
 
   #if ENABLED(NEWPANEL)
-    #define LCD_PINS_RS         16
-    #define LCD_PINS_ENABLE     17
-    #define LCD_PINS_D4         23
-    #define LCD_PINS_D5         25
-    #define LCD_PINS_D6         27
-    #define LCD_PINS_D7         29
+    #define LCD_PINS_RS    16
+    #define LCD_PINS_ENABLE 17
+    #define LCD_PINS_D4    23
+    #define LCD_PINS_D5    25
+    #define LCD_PINS_D6    27
+    #define LCD_PINS_D7    29
   #endif
 
   #if ENABLED(MINIPANEL)
-    #define DOGLCD_CS           25
-    #define DOGLCD_A0           27
+    #define DOGLCD_CS      25
+    #define DOGLCD_A0      27
   #endif
+
+  #if ENABLED(VIKI2) || ENABLED(miniVIKI)
+    #define DOGLCD_A0           16
+    #define KILL_PIN            51
+    #define STAT_LED_BLUE_PIN   29
+    #define STAT_LED_RED_PIN    23
+    #define DOGLCD_CS           17
+    #define DOGLCD_SCK          76 //SCK_PIN   - required so that the DUE hardware SPI will be used
+    #define DOGLCD_MOSI         75 //MOSI_PIN  - required so that the DUE hardware SPI will be used
+    #define DOGLCD_MISO         74 //MISO_PIN
+  #endif
+
+
 #endif // ULTRA_LCD
 
-#if ENABLED(HAVE_TMC2208)
+#if HAS_DRIVER(TMC2208)
   /**
    * TMC2208 stepper drivers
    *
@@ -188,8 +203,8 @@
 //
 #if ENABLED(SPINDLE_LASER_ENABLE) && !PIN_EXISTS(SPINDLE_LASER_ENABLE)
   #if HOTENDS < 3
-    #define SPINDLE_LASER_ENABLE_PIN  45  // Use E2 ENA
-    #define SPINDLE_LASER_PWM_PIN     12  // MUST BE HARDWARE PWM
-    #define SPINDLE_DIR_PIN           47 // Use E2 DIR
+    #define SPINDLE_LASER_ENABLE_PIN  45   // Use E2 ENA
+    #define SPINDLE_LASER_PWM_PIN     12   // MUST BE HARDWARE PWM
+    #define SPINDLE_DIR_PIN           47   // Use E2 DIR
   #endif
 #endif
