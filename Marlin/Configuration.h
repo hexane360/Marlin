@@ -74,7 +74,7 @@
 // User-specified version info of this build to display in [Pronterface, etc] terminal window during
 // startup. Implementation of an idea by Prof Braino to inform user that any changes made to this
 // build by the user have been successfully uploaded into firmware.
-#define STRING_CONFIG_H_AUTHOR "(none, default config)" // Who made the changes.
+#define STRING_CONFIG_H_AUTHOR "Colin Gilgenbach (colin@gilgenbach.net)" // Who made the changes.
 #define SHOW_BOOTSCREEN
 #define STRING_SPLASH_LINE1 SHORT_BUILD_VERSION // will be shown during bootup in line 1
 #define STRING_SPLASH_LINE2 WEBSITE_URL         // will be shown during bootup in line 2
@@ -226,8 +226,8 @@
 // Offset of the extruders (uncomment if using more than one and relying on firmware to position when changing).
 // The offset has to be X=0, Y=0 for the extruder 0 hotend (default extruder).
 // For the other hotends it is their distance from the extruder 0 hotend.
-//#define HOTEND_OFFSET_X {0.0, 20.00} // (in mm) for each extruder, offset of the hotend on the X axis
-//#define HOTEND_OFFSET_Y {0.0, 5.00}  // (in mm) for each extruder, offset of the hotend on the Y axis
+#define HOTEND_OFFSET_X {0.0, -0.89} // (in mm) for each extruder, offset of the hotend on the X axis
+#define HOTEND_OFFSET_Y {0.0, -49.7}  // (in mm) for each extruder, offset of the hotend on the Y axis
 
 // @section machine
 
@@ -621,8 +621,8 @@
  *   M204 R    Retract Acceleration
  *   M204 T    Travel Acceleration
  */
-#define DEFAULT_ACCELERATION          500    // X, Y, Z and E acceleration for printing moves
-#define DEFAULT_RETRACT_ACCELERATION  3000    // E acceleration for retracts
+#define DEFAULT_ACCELERATION          400    // X, Y, Z and E acceleration for printing moves
+#define DEFAULT_RETRACT_ACCELERATION  1500    // E acceleration for retracts
 #define DEFAULT_TRAVEL_ACCELERATION   3000    // X, Y, Z acceleration for travel (non printing) moves
 
 /**
@@ -766,7 +766,7 @@
  */
 #define X_PROBE_OFFSET_FROM_EXTRUDER 0    // X offset: -left  +right  [of the nozzle]
 #define Y_PROBE_OFFSET_FROM_EXTRUDER 0    // Y offset: -front +behind [the nozzle]
-#define Z_PROBE_OFFSET_FROM_EXTRUDER -1.28 // Z offset: -below +above  [the nozzle]
+#define Z_PROBE_OFFSET_FROM_EXTRUDER -1.37 // Z offset: -below +above  [the nozzle]
 
 #define MIN_PROBE_X X_MIN_POS //override probe limits
 #define MIN_PROBE_Y Y_MIN_POS
@@ -1140,7 +1140,7 @@
 
 // Homing speeds (mm/m)
 #define HOMING_FEEDRATE_XY (6000)
-#define HOMING_FEEDRATE_Z  (200)
+#define HOMING_FEEDRATE_Z  (300)
 
 // @section calibrate
 
@@ -1321,8 +1321,8 @@
   #define NOZZLE_CLEAN_TRIANGLES  6
 
   // Specify positions as { X, Y, Z }
-  #define NOZZLE_CLEAN_START_POINT { -10.5,  79, 1.0} //values vary for single extruder
-  #define NOZZLE_CLEAN_END_POINT   {  -6.5, 108, 1.0}
+  #define NOZZLE_CLEAN_START_POINT { -10.5,  79, 0.5} //values vary for single extruder
+  #define NOZZLE_CLEAN_END_POINT   {  -6.5, 108, 0.5}
 
   // Circular pattern radius
   #define NOZZLE_CLEAN_CIRCLE_RADIUS 6.5
