@@ -807,7 +807,7 @@
    */
   #define G29_SUCCESS_COMMANDS "M117 Bed leveling done."
   #define G29_RECOVER_COMMANDS "M117 Probe failed. Rewiping.\nG12 P1\nM117 Leveling. . ."
-  #define G29_FAILURE_COMMANDS "M104 S0\nM140 S0\nG91\nG1 Z40 E25 F200\nM400"
+  #define G29_FAILURE_COMMANDS "M104 S0 T0\nM104 S0 T1\nM140 S0\nG91\nM605 S2\nG1 Z40 E25 F200\nM605 S0\nM400"
   /**
    * Specify an action command to send to the host on a recovery attempt or failure.
    * Will be sent in the form '//action:ACTION_ON_G29_FAILURE', e.g. '//action:probe_failed'.
@@ -1518,7 +1518,7 @@
   #define USER_SCRIPT_RETURN  // Return to status screen after a script
 
   #define USER_DESC_1 "Calibrate"
-  #define USER_GCODE_1 "T0\nG90\nG92 E0\nM104 S150\nM117 Homing XY. . .\nG28 O XY\nM117 Heating. . .\nM109 R150\nG1 E-20 F100\nM117 Homing Z. . .\nG28 Z\nM117 Wiping. . .\nG12 P1\nM117 Leveling. . .\nG29\nM104 S0\nM117 Calibrated.\nG1 X5 Y15 Z40 E5 F6000"
+  #define USER_GCODE_1 "T0\nG90\nG92 E0\nM104 S150 T0\nM104 S150 T1\nM117 Homing XY. . .\nG28 O XY\nM117 Heating. . .\nM109 R150\nM605 S2\nG1 E-20 F100\nM117 Homing Z. . .\nG28 Z\nM117 Wiping. . .\nG12 P1\nM117 Leveling. . .\nG29\nM104 S0 T0\nM104 S0 T1\nM117 Calibrated.\nG1 X5 Y15 Z40 E5 F6000\nM605 S0"
 
   //#define USER_DESC_2 "Preheat for PLA"
   //#define USER_GCODE_2 "M140 S" STRINGIFY(PREHEAT_1_TEMP_BED) "\nM104 S" STRINGIFY(PREHEAT_1_TEMP_HOTEND)
@@ -1532,6 +1532,8 @@
   //#define USER_DESC_5 "Home & Info"
   //#define USER_GCODE_5 "G28\nM503"
 #endif
+
+#define CUSTOM_CANCEL_GCODE "M104 S0 T0\nM104 S0 T1\nM140 S0\nG91\nM605 S2\nG0 Z30 E-5 F2000\nM605 S0\nG90\nG11 S1 T0\nG11 S1 T1\nM107\nM107 P1\n"
 
 /**
  * Specify an action command to send to the host when the printer is killed.

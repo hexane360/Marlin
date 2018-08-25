@@ -932,9 +932,13 @@ void loop() {
         clear_command_queue();
         quickstop_stepper();
         print_job_timer.stop();
-        thermalManager.disable_all_heaters();
-        #if FAN_COUNT > 0
-          for (uint8_t i = 0; i < FAN_COUNT; i++) fanSpeeds[i] = 0;
+        #ifdef CUSTOM_CANCEL_GCODE
+          enqueue_and_echo_commands_P(PSTR(CUSTOM_CANCEL_GCODE));
+        #else //default cancel code
+          thermalManager.disable_all_heaters();
+          #if FAN_COUNT > 0
+            for (uint8_t i = 0; i < FAN_COUNT; i++) fanSpeeds[i] = 0;
+          #endif
         #endif
         wait_for_heatup = false;
         #if ENABLED(POWER_LOSS_RECOVERY)
