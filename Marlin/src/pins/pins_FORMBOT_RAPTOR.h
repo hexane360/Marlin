@@ -32,8 +32,8 @@
   #error "Formbot supports up to 3 hotends / E-steppers. Comment this line to keep going."
 #endif
 
-#define DEFAULT_MACHINE_NAME "Formbot"
-#define BOARD_NAME           "Formbot"
+#define DEFAULT_MACHINE_NAME "Formbot Raptor"
+#define BOARD_NAME           "Formbot Raptor"
 
 //
 // Servos
@@ -109,7 +109,7 @@
 //
 #define TEMP_0_PIN         13   // Analog Input
 #define TEMP_1_PIN         15   // Analog Input
-#define TEMP_BED_PIN        3   // Analog Input
+#define TEMP_BED_PIN       14   // Analog Input
 
 // SPI for Max6675 or Max31855 Thermocouple
 #if DISABLED(SDSUPPORT)
@@ -140,13 +140,13 @@
 //
 #define HEATER_0_PIN       10
 #define HEATER_1_PIN        7
-#define HEATER_BED_PIN     58
+#define HEATER_BED_PIN     8
 
-#define LED4_PIN            8
+#define LED4_PIN            5
 
 #define FAN_PIN             9
 
-#if !ENABLED(FILAMENT_RUNOUT_SENSOR)
+#if DISABLED(FILAMENT_RUNOUT_SENSOR)
   #define FAN1_PIN          4
 #endif
 
