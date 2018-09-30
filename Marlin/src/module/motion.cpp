@@ -1471,13 +1471,24 @@ void homeaxis(const AxisEnum axis) {
   
   // Back away from endstop
   #if defined(HOMING_BACKOFF)
-    const float backoff = pgm_read_any(&homing_backoff[axis]);
-    if (backoff > 0) {
-      #if ENABLED(DEBUG_LEVELING_FEATURE)
-        if (DEBUGGING(LEVELING)) SERIAL_ECHOLNPGM("Backing off:");
-      #endif
-      do_homing_move(axis, backoff * -axis_home_dir);
-    }
+    #if HOMING_Z_WITH_PROBE
+      if (axis != Z_AXIS) { //probe behavior overrides backoff behavior (and is handled in G28)
+    #endif
+        const float backoff = pgm_read_any(&homing_backoff[axis]);
+        if (backoff > 0) {
+          #if ENABLED(DEBUG_LEVELING_FEATURE)
+            if (DEBUGGING(LEVELING)) SERIAL_ECHOLNPGM("Backing off:");
+          #endif
+          current_position[axis] -= backoff * axis_home_dir;
+          line_to_current_position();
+          report_current_position();
+          #if ENABLED(DEBUG_LEVELING_FEATURE)
+            if (DEBUGGING(LEVELING)) DEBUG_POS("", current_position);
+          #endif
+        }
+    #if HOMING_Z_WITH_PROBE
+      }
+    #endif
   #endif
 
   #if ENABLED(DEBUG_LEVELING_FEATURE)
